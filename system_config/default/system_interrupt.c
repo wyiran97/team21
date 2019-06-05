@@ -61,6 +61,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system/common/sys_common.h"
 #include "app.h"
+#include "sensor_queue.h"
+#include "debug.h"
 #include "system_definitions.h"
 
 // *****************************************************************************
@@ -68,8 +70,18 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
-
  
-/*******************************************************************************
+ 
+
+void IntHandlerDrvTmrInstance0(void)
+{
+    dbgOutputLoc(DLOC_ENTER_ISR);
+    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
+    BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+    SendSensorValToQueue(&pxHigherPriorityTaskWoken);
+    dbgOutputLoc(DLOC_LEAVE_ISR);
+    portEND_SWITCHING_ISR(pxHigherPriorityTaskWoken);
+}
+ /*******************************************************************************
  End of File
 */

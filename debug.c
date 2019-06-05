@@ -36,12 +36,13 @@ char dbgUARTVal(unsigned char outVal)
     return outVal;
 }
 
-void stop()
+void stop(unsigned int outVal)
 {
+    SYS_INT_Disable();
     vTaskSuspendAll();
     while (1)
     {
-        dbgOutputLoc(0x7F); //if stop everything, output 127 in decimal
+        dbgOutputLoc(outVal); //if stop everything, output 127 in decimal
     }
 }
 /* *****************************************************************************

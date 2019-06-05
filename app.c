@@ -54,7 +54,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "app.h"
-
+#include "debug.h"
+#include "sensor_queue.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -72,7 +73,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 void APP_Initialize ( void )
 {
-    
+    Queue_Initialize();
 }
 
 
@@ -86,9 +87,13 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
-    //just check the output and logic analyzer work
-    dbgOutputLoc(0x01);
-    dbgOutputVal(0x02);
+    
+    dbgOutputLoc(DLOC_TASK_BEGIN);
+    while(1)
+    {
+        Message sensor_value = ReceiveFromQueue();
+        dbgOutputVal(sensor_value.sensorVal);
+    }
 }
 
  
