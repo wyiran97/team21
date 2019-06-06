@@ -73,6 +73,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 void APP_Initialize ( void )
 {
+    DRV_ADC_Open();
+    DRV_ADC_Start();
+    DRV_TMR0_Start();
     Queue_Initialize();
 }
 
@@ -87,13 +90,13 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
-    
-    dbgOutputLoc(DLOC_TASK_BEGIN);
     while(1)
     {
-        Message sensor_value = ReceiveFromQueue();
-        dbgOutputVal(sensor_value.sensorVal);
+        //dbgOutputLoc(DLOC_TASK_BEGIN);
+        Message result = ReceiveFromQueue();
+        dbgOutputVal(result.sensorVal);
     }
+     
 }
 
  

@@ -29,7 +29,7 @@ typedef struct {
 
 void Queue_Initialize();
 Message ReceiveFromQueue();
-void SendSensorToQueue(BaseType_t *pxHigherPriorityTaskWoken);
+void SendSensorToQueue(BaseType_t pxHigherPriorityTaskWoken);
 unsigned int ConversionFromADC(unsigned int value);
 
 /* Provide C++ Compatibility */

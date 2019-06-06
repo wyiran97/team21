@@ -61,8 +61,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system/common/sys_common.h"
 #include "app.h"
-#include "sensor_queue.h"
 #include "debug.h"
+#include <stdio.h>
+#include <FreeRTOS.h>
+#include "queue.h"
+#include "system_config.h"
 #include "system_definitions.h"
 
 // *****************************************************************************
@@ -75,11 +78,12 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 void IntHandlerDrvTmrInstance0(void)
 {
-    dbgOutputLoc(DLOC_ENTER_ISR);
     PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
+    //dbgOutputLoc(DLOC_ENTER_ISR);
     BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
-    SendSensorValToQueue(&pxHigherPriorityTaskWoken);
-    dbgOutputLoc(DLOC_LEAVE_ISR);
+    SendSensorValToQueue(pxHigherPriorityTaskWoken);
+    PORTAbits.RA3 = !PORTAbits.RA3;
+    //dbgOutputLoc(DLOC_LEAVE_ISR);
     portEND_SWITCHING_ISR(pxHigherPriorityTaskWoken);
 }
  /*******************************************************************************

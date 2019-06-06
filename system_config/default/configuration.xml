@@ -283,7 +283,7 @@
       <Template dnOrder="5">
         <Name dnOrder="0">drv_adc_static.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default/framework/driver/adc/src</Path>
-        <Checksum dnOrder="2">BCD19A7DF8AFEABFEFEDEE70CDCFDA39</Checksum>
+        <Checksum dnOrder="2">03C60EC827DB907704C2CF4E665C6C1C</Checksum>
       </Template>
       <Template dnOrder="6">
         <Name dnOrder="0">bsp.c</Name>
