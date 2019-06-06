@@ -19,6 +19,7 @@
 #include "queue.h"
 #include "system_config.h"
 #include "system_definitions.h"
+#include <math.h>
 
 QueueHandle_t Globle_Queue;
 typedef struct {
@@ -30,7 +31,7 @@ typedef struct {
 void Queue_Initialize();
 Message ReceiveFromQueue();
 void SendSensorToQueue(BaseType_t pxHigherPriorityTaskWoken);
-unsigned int ConversionFromADC(unsigned int value);
+Message ConversionFromADC(unsigned int value);
 
 /* Provide C++ Compatibility */
 #ifdef __cplusplus

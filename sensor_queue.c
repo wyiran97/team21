@@ -1,17 +1,14 @@
 /* ************************************************************************** */
 /** Descriptive File Name
 
-  @Company
-    Company Name
+    @Course
+        Summer2019 ECE 4534
+ 
+    @File Name
+         debug.h
 
-  @File Name
-    filename.c
-
-  @Summary
-    Brief description of the file.
-
-  @Description
-    Describe the purpose of this file.
+    @Edited
+         team 21
  */
 /* ************************************************************************** */
 
@@ -26,7 +23,14 @@
  */
 void Queue_Initialize()
 {
+    DRV_ADC_Open();
+    DRV_ADC_Start();
+    DRV_TMR0_Start();
     Globle_Queue = xQueueCreate(15,sizeof(Message));
+    if (Globle_Queue == NULL)
+    {
+        stop(STOP_CREATE_ERROR);
+    }
 }
 
 
@@ -35,12 +39,17 @@ void Queue_Initialize()
  */
 Message ReceiveFromQueue()
 {
+    dbgOutputLoc(DLOC_RECEIVE_FROM_QUEUE_BEGIN);
     Message result;
-    //dbgOutputLoc(DLOC_RECEIVE_FROM_QUEUE_BEGIN);
+    
     if (xQueueReceive(Globle_Queue, &result, portMAX_DELAY) == pdTRUE)
     {
         dbgOutputLoc(DLOC_RECEIVE_FROM_QUEUE_END);
-         return result;
+        return result;
+    }
+    else
+    {
+        stop(STOP_NO_RECEIVE);
     }
 }
 
@@ -51,7 +60,22 @@ Message ReceiveFromQueue()
  */
 void SendSensorValToQueue(BaseType_t pxHigherPriorityTaskWoken)
 {
-    //dbgOutputLoc(DLOC_SEND_TO_QUEUE_BEGIN);
+    dbgOutputLoc(DLOC_SEND_TO_QUEUE_BEGIN);
+    Message msg;
+    
+    msg = ConversionFromADC(DRV_ADC_SamplesRead(0));
+    if (xQueueSendToBackFromISR(Globle_Queue, &msg, &pxHigherPriorityTaskWoken) == pdPASS)
+    {
+        dbgOutputLoc(DLOC_SEND_TO_QUEUE_END);  //send successfully
+    }
+    else
+    {
+      stop(STOP_NO_SEND);
+    }
+}
+
+Message ConversionFromADC(unsigned int value)
+{
     Message msg;
     msg.units[0] = 'c';
     msg.units[1] = 'e';
@@ -64,33 +88,9 @@ void SendSensorValToQueue(BaseType_t pxHigherPriorityTaskWoken)
     msg.units[8] = 'e';
     msg.units[9] = 'r';
     msg.units[10] = 's';
-    unsigned int sensorValue;
-    unsigned int sensorValConvert;
-    
-    
-    sensorValue = DRV_ADC_SamplesRead(0);
-    //sensorValConvert = ConversionFromADC(sensorValue);
-    
-    
-    msg.sensorVal = 9;
-    xQueueSendToBackFromISR(Globle_Queue, &msg, &pxHigherPriorityTaskWoken);
-    //{
-        dbgOutputLoc(DLOC_SEND_TO_QUEUE_END);  //send successfully
-    //}
-   // else
-    //{
-      //  stop(0x09);
-    //}
+    msg.sensorVal = 108534.81*pow((value*3300/1024),-1.2);
+    return msg;
 }
-
-unsigned int ConversionFromADC(unsigned int value)
-{
-    unsigned int result;
-    unsigned int voltageRatio = 1023/3.3 * value;
-    result = 4.8 / (voltageRatio - 0.02);
-    return result;
-}
-
 /* *****************************************************************************
  End of File
  */

@@ -56,7 +56,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "app.h"
 #include "debug.h"
 #include "sensor_queue.h"
-
+#include "sensor_state.h"
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Initialization and State Machine Functions
@@ -73,10 +73,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 void APP_Initialize ( void )
 {
-    DRV_ADC_Open();
-    DRV_ADC_Start();
-    DRV_TMR0_Start();
-    Queue_Initialize();
+   Queue_Initialize();
 }
 
 
@@ -90,11 +87,13 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
+    int sumInit = 0;
+    sensorState state = ONE;
+    dbgOutputLoc(DLOC_TASK_BEGIN);
     while(1)
     {
-        //dbgOutputLoc(DLOC_TASK_BEGIN);
         Message result = ReceiveFromQueue();
-        dbgOutputVal(result.sensorVal);
+        runStateMachine(&sumInit, result, &state);
     }
      
 }
