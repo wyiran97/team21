@@ -60,17 +60,15 @@ void runStateMachine(int *sum, Message messageValue, sensorState *currentState)
 
 void printOutAverage(int average, Message msg)
 {
-    char buffer[3];
+    char buffer[2];
     itoa(buffer,average, 10);
     dbgUARTVal(buffer[0]);
     dbgUARTVal(buffer[1]);
-    dbgUARTVal(buffer[2]);
     int i;
     for (i = 0; i < 11; i++)
     {
         dbgUARTVal(msg.units[i]);
     }
-    dbgUARTVal(' ');
 }
 
 /* *****************************************************************************
