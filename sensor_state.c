@@ -5,7 +5,7 @@
         Summer2019 ECE 4534
  
     @File Name
-         debug.h
+         sensor_state.c
 
     @Edited
          team 21
@@ -49,7 +49,7 @@ void runStateMachine(int *sum, Message messageValue, sensorState *currentState)
             dbgOutputVal(messageValue.sensorVal);
             *sum = *sum + messageValue.sensorVal;
             *currentState = ONE;
-            int avgValue = *sum / 5;
+            int avgValue = *sum / SAMPLE_TIMES;
             *sum = 0;
             printOutAverage(avgValue, messageValue);
             break;
@@ -60,12 +60,12 @@ void runStateMachine(int *sum, Message messageValue, sensorState *currentState)
 
 void printOutAverage(int average, Message msg)
 {
-    char buffer[2];
-    itoa(buffer,average, 10);
+    char buffer[BUFFER_SIZE];
+    itoa(buffer,average, IN_DECIMAL);
     dbgUARTVal(buffer[0]);
     dbgUARTVal(buffer[1]);
     int i;
-    for (i = 0; i < 11; i++)
+    for (i = 0; i < UNITS_SIZE; i++)
     {
         dbgUARTVal(msg.units[i]);
     }

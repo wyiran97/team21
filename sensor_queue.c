@@ -5,7 +5,7 @@
         Summer2019 ECE 4534
  
     @File Name
-         debug.h
+    sensor_queue.c
 
     @Edited
          team 21
@@ -16,8 +16,6 @@
 #include "debug.h"
 
 
-
-
 /*
  * create queue
  */
@@ -26,8 +24,8 @@ void Queue_Initialize()
     DRV_ADC_Open();
     DRV_ADC_Start();
     DRV_TMR0_Start();
-    Globle_Queue = xQueueCreate(15,sizeof(Message));
-    if (Globle_Queue == NULL)
+    msgQueue = xQueueCreate(QUEUE_SIZE,sizeof(Message));
+    if (msgQueue == NULL)
     {
         stop(STOP_CREATE_ERROR);
     }
@@ -39,10 +37,9 @@ void Queue_Initialize()
  */
 Message ReceiveFromQueue()
 {
-    dbgOutputLoc(DLOC_RECEIVE_FROM_QUEUE_BEGIN);
     Message result;
-    
-    if (xQueueReceive(Globle_Queue, &result, portMAX_DELAY) == pdTRUE)
+    dbgOutputLoc(DLOC_RECEIVE_FROM_QUEUE_BEGIN);
+    if (xQueueReceive(msgQueue, &result, portMAX_DELAY))
     {
         dbgOutputLoc(DLOC_RECEIVE_FROM_QUEUE_END);
         return result;
@@ -60,11 +57,10 @@ Message ReceiveFromQueue()
  */
 void SendSensorValToQueue(BaseType_t pxHigherPriorityTaskWoken)
 {
-    dbgOutputLoc(DLOC_SEND_TO_QUEUE_BEGIN);
     Message msg;
-    
     msg = ConversionFromADC(DRV_ADC_SamplesRead(0));
-    if (xQueueSendToBackFromISR(Globle_Queue, &msg, &pxHigherPriorityTaskWoken) == pdPASS)
+    dbgOutputLoc(DLOC_SEND_TO_QUEUE_BEGIN);
+    if (xQueueSendToBackFromISR(msgQueue, &msg, &pxHigherPriorityTaskWoken) == pdPASS)
     {
         dbgOutputLoc(DLOC_SEND_TO_QUEUE_END);  //send successfully
     }
@@ -77,18 +73,28 @@ void SendSensorValToQueue(BaseType_t pxHigherPriorityTaskWoken)
 Message ConversionFromADC(unsigned int value)
 {
     Message msg;
-    msg.units[0] = 'c';
-    msg.units[1] = 'e';
-    msg.units[2] = 'n';
-    msg.units[3] = 't';
-    msg.units[4] = 'i';
-    msg.units[5] = 'm';
-    msg.units[6] = 'e';
-    msg.units[7] = 't';
-    msg.units[8] = 'e';
-    msg.units[9] = 'r';
-    msg.units[10] = 's';
-    msg.sensorVal = 108534.81*pow((value*3300/1024),-1.2);
+    char tempUnits[UNITS_SIZE] = "centimeters";
+    int i;
+    for (i = 0; i < UNITS_SIZE; i++)
+    {
+        msg.units[i] = tempUnits[i];
+    }
+    
+    //formula: 108534.81*pow((value*3300/1024),-1.2);
+    int adcArray[] = { 26651,11600,7131,5049,3863,3104,2580,2198,1908,1682,1500,1351,1227,1123,1034,957, 
+                        890,831,778,732,690,653,619,588,560,534,511,489,469,450,433,416,401,387,374,362, 
+                        350,339,328,319,309,300,292,284,277,269,263,256,250,244,238,233,227,222,217,213,208, 
+                        204,200,196,192,188,185,181};
+    
+    if (value >= 1 && value <= LUT_SIZE)
+    {
+        msg.sensorVal = adcArray[value - 1];
+    }
+    else
+    {
+        value = value >> ADC_SHIFT;
+        msg.sensorVal = (adcArray[value - 1] >> DIS_SHIFT) + 2;
+    }
     return msg;
 }
 /* *****************************************************************************

@@ -4,7 +4,7 @@
     Summer2019 ECE 4534
  
   @File Name
-    debug.h
+    sensor_queue.h
 
   @Edited
     team 21
@@ -21,13 +21,17 @@
 #include "system_definitions.h"
 #include <math.h>
 
-QueueHandle_t Globle_Queue;
+#define QUEUE_SIZE 0x0f
+#define UNITS_SIZE 0x0b
+#define LUT_SIZE 0x40
+#define ADC_SHIFT 0x04
+#define DIS_SHIFT 0x05
 typedef struct {
     unsigned int sensorVal;
-    char units[11];     //centimeters
+    char units[UNITS_SIZE];     //centimeters
 }Message;
 
-
+QueueHandle_t msgQueue;
 void Queue_Initialize();
 Message ReceiveFromQueue();
 void SendSensorToQueue(BaseType_t pxHigherPriorityTaskWoken);

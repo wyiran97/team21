@@ -4,7 +4,7 @@
     Summer2019 ECE 4534
  
   @File Name
-    debug.h
+    sensor_state.h
 
   @Edited
     team 21
@@ -22,6 +22,9 @@
 #include "system_config.h"
 #include "system_definitions.h"
 
+#define SAMPLE_TIMES 0x05
+#define BUFFER_SIZE 0x02
+#define IN_DECIMAL 0x0a
 typedef enum {ONE, TWO, THREE, FOUR, FIVE}sensorState;
 
 void runStateMachine(int *sum, Message messageValue, sensorState *currentState);
