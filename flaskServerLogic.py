@@ -84,6 +84,48 @@ def put_test_logic(document_name, collection, seqNum):
         error = {'status': BAD_REQUEST, 'error': 'Bad data for: ' + request.url, 'seq': seqNum}
         return buildError(error["status"],error)
 
+def stat_logic(collection, seqNum):
+    statData = request.get_json()
+    boardName = statData['name']
+    reqSend = statData['requetSent']
+    corRec = statData['correctReceive']
+    missReply = statData['missReply']
+    global Stat_corRec
+    global Stat_inCorRec
+    
+    seq = {"seq":seqNum}
+    seq_json = dumps(seq)
+    
+    serverStatData = {"name":"server","serverRecieve":Stat_corRec,"serverMissRequest":Stat_misReq,"serverCorrectReply":Stat_corReply,"serverInCorrectReply":Stat_inCorReply}
+
+	#server statistic
+    if serverStatData:
+        server_cursor = collection.find({"name":"server"}).limit(1)
+        server = next(server_cursor,None)
+        if server:
+            collection.update_one({"name":"server"}, {"$set": {"serverRecieve": Stat_corRec,"serverMissRequest": Stat_misReq,"serverCorrectReply": Stat_corReply,"serverInCorrectReply": Stat_inCorReply}})
+        else:
+            serverStatData["name"] = "server"
+            collection.insert_one(serverStatData)
+    else:
+        error = {'status': BAD_REQUEST, 'error': 'Bad data for: ' + request.url}
+    
+    
+    #PIC32 statistic
+    if statData:
+        oldDebug_cursor = collection.find({"name": boardName}).limit(1)
+        oldDebug = next(oldDebug_cursor,None)
+        if oldDebug:
+            collection.update_one({"name": boardName}, {"$set": {"requetSent": reqSend,"correctReceive": corRec,"missReply": missReply}})
+        else:
+            statData["name"] = boardName
+            collection.insert_one(statData)
+        request_logicTrue)
+        return Response(seq_json, status=201, mimetype='application/json')
+    else:
+        request_logic(False)
+        error = {'status': BAD_REQUEST, 'error': 'Bad data for: ' + request.url, 'seq': seqNum}
+        return buildError(error["status"],error)
 #########################################################
 #                 HELPERS - DEBUG - START
 #########################################################
