@@ -6,7 +6,12 @@
 from flask import Flask, jsonify, request, Response
 from bson.json_util import dumps
 
-
+seqNumOf3Board = [0, 0, 0]
+Stat_corRec = 0
+Stat_inCorRec = 0
+Stat_corReply = 0
+Stat_inCorReply = 0
+Stat_misReq = 0
 #########################################################
 #                    ERRORS - START
 #########################################################
@@ -22,87 +27,63 @@ NOT_FOUND=404
 #                 HELPERS - SUM - START
 #########################################################
 
+
+
+def printSequenceNum(index, seqNum):
+    global Stat_misReq
+    global seqNumOf3Board
+    seqNumOf3Board[index] += 1
+    if seqNum - seqNumOf3Board[index] >= 1:
+        print(seqNum)
+        Stat_misReq += (seqNum - seqNumOf3Board[index])
+        
+    seqNumOf3Board[index] = seqNum
+	
+def request_logic(correct):
+    global Stat_corRec
+    global Stat_inCorRec
+    if(correct == True):
+        Stat_corRec += 1
+    else:
+        Stat_inCorRec += 1    
+        
+
+def reply_logic(correct):
+    global Stat_corReply
+    global Stat_inCorReply
+    if(correct == True):
+        Stat_corReply += 1
+    else:
+        Stat_inCorReply += 1
+
 #Goal:   Add an integer to a document in the database
 #        Create the document if it doesn't exist
 #Input:
 #        -document_name: name of the document (string)
 #        -collection: collection to add the document to (collection)
 #Output: HTTP response (success or error)
-def put_add_logic(document_name, collection):
-    expected_length=2
-    sumData = request.get_json()
-    validData_nb = sum_put_checkData(sumData,expected_length)
-
+def put_test_logic(document_name, collection, seqNum):
+    data = request.get_json()
+    request_logic(True)
+    seq = {"seq":seqNum}
+    seq_json = dumps(seq)
     #Add to object or create object if necessary
-    if validData_nb == expected_length:
-        oldSum_cursor = collection.find({"name": document_name}).limit(1)
-        oldSum = next(oldSum_cursor,None)
-        if oldSum:
-            newSum = oldSum["value"] + sumData["value"]
-            collection.update_one({"name": document_name}, {"$set": {"value": newSum}})
+    if data:
+        value = data['VALUE']
+        nameTest = data['TESTNAME']
+        oldPut_cursor = collection.find({"name":document_name}).limit(1)
+        oldPut = next(oldPut_cursor,None)
+        if oldPut:
+            collection.update_one({"name":document_name}, {"$set": {"VALUE":value,"TESTNAME":nameTest}})
         else:
-            collection.insert_one(sumData)
-        return Response("Sum Value Updated", status=201)
+            collection.insert_one({"name":document_name,"VALUE":value,"TESTNAME":nameTest})
+        reply_logic(True)
+        return Response(seq_json, status=201, mimetype='application/json')
     else:
-        error = {'status': BAD_REQUEST, 'error': 'Bad data for: ' + request.url}
+        reply_logic(False)
+        error = {'status': BAD_REQUEST, 'error': 'Bad data for: ' + request.url, 'seq': seqNum}
         return buildError(error["status"],error)
 
-#Goal:   Check that if the data received has the correct format
-#        Correct: name = sum / value: integer
-#Input:
-#        -sumData: Data received (dict)
-#        -expected_length: Expected length of the data (default to 2) (int)
-#Output: Number of valid key/values in sumData (int)
-def sum_put_checkData(sumData,expected_length=2):
-    validData_nb = 0
-    #Expecting name and integer
-    if len(sumData) == expected_length:
-        for key, value in sumData.items():
-            if key == "name" and value == "sum":
-                validData_nb = validData_nb + 1
-            if key == "value" and isinstance(value, (int,float)):
-                validData_nb = validData_nb + float(value).is_integer()
-    return validData_nb
-#########################################################
-#                 HELPERS - SUM - START
-#########################################################
-
-#########################################################
-#                 HELPERS - DEBUG - START
-#########################################################
-#Goal:   Append a payload to a document in the database
-#        Create the document if it doesn't exist
-#Input:
-#        -document_name: name of the document (string)
-#        -collection: collection to append the document to (collection)
-#Output: HTTP response (success or error)
-def put_append_logic(document_name, collection):
-    debugData = request.get_json()
-
-    #Add to object or create object if necessary
-    if debugData:
-        oldDebug_cursor = collection.find({"name": document_name}).limit(1)
-        oldDebug = next(oldDebug_cursor,None)
-        if oldDebug:
-            collection.update_one({"name": document_name}, {"$set": debugData})
-        else:
-            debugData["name"] = "debug"
-            collection.insert_one(debugData)
-        return Response("Debug Value Updated", status=201)
-    else:
-        error = {'status': BAD_REQUEST, 'error': 'Bad data for: ' + request.url}
-        return buildError(error["status"],error)
-
-def sum_put_checkData(sumData,expected_length=2):
-    validData_nb = 0
-    #Expecting name and integer
-    if len(sumData) == expected_length:
-        for key, value in sumData.items():
-            if key == "name" and value == "sum":
-                validData_nb = validData_nb + 1
-            if key == "value":
-                validData_nb = validData_nb + float(value).is_integer()
-    return validData_nb
 #########################################################
 #                 HELPERS - DEBUG - START
 #########################################################
@@ -116,13 +97,20 @@ def sum_put_checkData(sumData,expected_length=2):
 #        -document_name: name of the document (string)
 #        -collection: collection to get the document from (collection)
 #Output: HTTP response with document or HTTP error
-def get_logic(document_name, collection):
+def get_logic(document_name, collection, seqNum):
     document = getDocument(document_name, collection)
+    document.update({'seq':seqNum})
+    if document.get("_id"):
+        del document["_id"]
+        
+    request_logic(True)
     if document:
         document_json = dumps(document)
         #Send back HTTP response
+        reply_logic(True)
         return Response(document_json, status=SUCCESS, mimetype='application/json')
     else:
+        reply_logic(False)
         return buildError(NOT_FOUND)
 
 #Goal:   Get unique document from the database

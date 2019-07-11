@@ -28,24 +28,60 @@ collection = db['test_collection']
 @app.route("/")
 def hello():
     return "Hello World!"
-
-@app.route("/sum", methods=['GET', 'PUT'])
-def sum():
+	
+@app.route("/bord1/<int:seqNum>", methods=['GET', 'PUT'])
+def bord1(seqNum):
+    printSequenceNum(0, seqNum)
     if request.method == 'GET':
-        return get_logic("sum", collection)
+        return get_logic("test", collection, seqNum)
     elif request.method == 'PUT':
-        return put_add_logic("sum", collection)
-
-@app.route("/debug", methods=['GET', 'PUT'])
-def debug():
+        return put_test_logic("test", collection, seqNum)	
+	
+@app.route("/bord2/<int:seqNum>", methods=['GET', 'PUT'])
+def bord2(seqNum):
+    printSequenceNum(1, seqNum)
     if request.method == 'GET':
-        return get_logic("debug",collection)
+        return get_logic("test", collection, seqNum)
     elif request.method == 'PUT':
-        return put_append_logic("debug", collection)
+        return put_test_logic("test", collection, seqNum)
+
+@app.route("/bord3/<int:seqNum>", methods=['GET', 'PUT'])
+def bord3(seqNum):
+    printSequenceNum(2, seqNum)
+    if request.method == 'GET':
+        return get_logic("test", collection, seqNum)
+    elif request.method == 'PUT':
+        return put_test_logic("test", collection, seqNum)
+
+@app.route("/stat1/<int:seqNum>", methods=['PUT'])
+def stat1(seqNum):
+    printSequenceNum(0, seqNum)
+    if request.method == 'PUT':
+        return stat_logic(collection, seqNum)
+
+@app.route("/stat2/<int:seqNum>", methods=['PUT'])
+def stat2(seqNum):
+    printSequenceNum1, seqNum)
+    if request.method == 'PUT':
+        return stat_logic(collection, seqNum)
+
+@app.route("/stat3/<int:seqNum>", methods=['PUT'])
+def stat3(seqNum):
+    printSequenceNum(2, seqNum)
+    if request.method == 'PUT':
+        return stat_logic(collection, seqNum)
 
 @app.errorhandler(404)
 def not_found(error=None):
+    request_logic(False)
+    reply_logic(False)
     return buildError(404)
+	
+@app.errorhandler(400)
+def not_found(error=None):
+    request_logic(False)
+    reply_logic(False)
+    return buildError(400)
 
 #########################################################
 #                    APP ROUTES - END
