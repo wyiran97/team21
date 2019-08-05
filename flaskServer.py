@@ -29,13 +29,13 @@ collection = db['test_collection']
 def hello():
     return "Hello World!"
 	
-@app.route("/bord1/<int:seqNum>", methods=['GET', 'PUT'])
+@app.route("/arm/<int:seqNum>", methods=['GET', 'PUT'])
 def bord1(seqNum):
     printSequenceNum(0, seqNum)
     if request.method == 'GET':
-        return get_logic("test", collection, seqNum)
+        return get_logic("arm", collection, seqNum)
     elif request.method == 'PUT':
-        return put_test_logic("test", collection, seqNum)	
+        return put_test_logic("arm", collection, seqNum)	
 	
 @app.route("/bord2/<int:seqNum>", methods=['GET', 'PUT'])
 def bord2(seqNum):
@@ -61,7 +61,7 @@ def stat1(seqNum):
 
 @app.route("/stat2/<int:seqNum>", methods=['PUT'])
 def stat2(seqNum):
-    printSequenceNum1, seqNum)
+    printSequenceNum(1, seqNum)
     if request.method == 'PUT':
         return stat_logic(collection, seqNum)
 

@@ -69,14 +69,13 @@ def put_test_logic(document_name, collection, seqNum):
     seq_json = dumps(seq)
     #Add to object or create object if necessary
     if data:
-        value = data['VALUE']
-        nameTest = data['TESTNAME']
+        value = data['ARM_VALUE']
         oldPut_cursor = collection.find({"name":document_name}).limit(1)
         oldPut = next(oldPut_cursor,None)
         if oldPut:
-            collection.update_one({"name":document_name}, {"$set": {"VALUE":value,"TESTNAME":nameTest}})
+            collection.update_one({"name":document_name}, {"$set": {"ARM_VALUE":value}})
         else:
-            collection.insert_one({"name":document_name,"VALUE":value,"TESTNAME":nameTest})
+            collection.insert_one({"name":document_name,"ARM_VALUE":value})
         reply_logic(True)
         return Response(seq_json, status=201, mimetype='application/json')
     else:
@@ -120,7 +119,7 @@ def stat_logic(collection, seqNum):
         else:
             statData["name"] = boardName
             collection.insert_one(statData)
-        request_logicTrue)
+        request_logic(True)
         return Response(seq_json, status=201, mimetype='application/json')
     else:
         request_logic(False)
